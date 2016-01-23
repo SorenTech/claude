@@ -5,7 +5,7 @@ CMD ["/sbin/my_init"]
 
 RUN apt-get update \
     && apt-get -y upgrade \
-    && apt-get install curl php5-cli git
+    && apt-get -y install curl php5-cli git
 
 # Install Caddy and Middleware
 USER caddy
