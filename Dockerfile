@@ -1,32 +1,49 @@
-FROM phusion/baseimage:0.9.18
+FROM phusion/baseimage:latest
 MAINTAINER Alex Floyd Marshall <apmarshall@soren.tech>
 
 CMD ["/sbin/my_init"]
 
-RUN apt-get update
-RUN apt-get -y upgrade
-RUN apt-get install curl php5-cli git php-curl php-zip
+RUN apt-get update \
+    && apt-get -y upgrade \
+    && apt-get install -y --no-install-recommends \
+        curl \ 
+        php5-cli \ 
+        git \
+        g++ \
+        gcc \
+        libc6-dev \
+        make
 
 # Install Caddy and Middleware
-USER caddy
 
 # Step 1: Get Latest Version of Go
-RUN curl -O https://storage.googleapis.com/golang/go1.5.2.linux-amd64.tar.gz
-RUN tar -C /usr/local -xzf go$VERSION.$OS-$ARCH.tar.gz
-RUN export GOROOT=/usr/local/go
-RUN export PATH=$PATH:/usr/local/go/bin
+ENV GOLANG_VERSION 1.5.3
+ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
+ENV GOLANG_DOWNLOAD_SHA256 43afe0c5017e502630b1aea4d44b8a7f059bf60d7f29dfd58db454d4e4e0ae53
+
+RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
+	&& echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
+	&& tar -C /usr/local -xzf golang.tar.gz \
+	&& rm golang.tar.gz
+
+ENV GOROOT /usr/local/go
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:$GOROOT/bin:$PATH
+
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 # Step 2: Install Caddy + git and ipfilter Extensions
-RUN go get github.com/mholt/caddy
+RUN go get -u github.com/mholt/caddy
 RUN go get -u github.com/caddyserver/caddyext
 RUN caddyext install git
 RUN caddyext install ipfilter
 
 # Install Composer
-RUN curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+ENV COMPOSER_VERSION 1.0.0-alpha11
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=$COMPOSER_VERSION
 
 # Add cron task for automated updates
-RUN mkdir usr/local/cron
+RUN mkdir /usr/local/cron
 ADD crons.conf /usr/local/cron/crons.conf
 ONBUILD crontab /usr/local/cron/crons.conf
 
@@ -41,5 +58,6 @@ EXPOSE 9000
 
 CMD /usr/bin/php-fpm
 
+RUN groupadd -r caddy && useradd -r -g caddy caddy
+USER caddy
 WORKDIR /var/www
-RUN setcap cap_net_bind_service=+ep ./caddy
