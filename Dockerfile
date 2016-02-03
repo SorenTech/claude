@@ -28,7 +28,7 @@ RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
 
 ENV GOROOT /usr/local/go
 ENV GOPATH /go
-ENV PATH $GOPATH/bin:$GOROOTgit/bin:$PATH
+ENV PATH $GOPATH/bin:$GOROOT/bin:$PATH
 
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
