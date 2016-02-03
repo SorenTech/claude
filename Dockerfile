@@ -12,7 +12,7 @@ RUN groupadd -r caddy && useradd -r -g caddy caddy
 USER caddy
 
 # Step 1: Get Latest Version of Go
-RUN curl -O https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz \
+RUN curl -sS https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz \
     && tar -C /usr/local -xzf go1.5.3.linux-amd64.tar.gz
 RUN export GOROOT=/usr/local/go
 RUN export PATH=$PATH:/usr/local/go/bin
