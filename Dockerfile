@@ -58,5 +58,6 @@ EXPOSE 9000
 
 CMD /usr/bin/php-fpm
 
+RUN groupadd -r caddy && useradd -r -g caddy caddy
+USER caddy
 WORKDIR /var/www
-RUN setcap cap_net_bind_service=+ep ./caddy
