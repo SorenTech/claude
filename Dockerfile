@@ -30,7 +30,7 @@ RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
 
 ENV GOROOT /usr/local/go
 ENV GOPATH /go
-ENV PATH $GOPATH/bin:$GOROOT/bin:$PATH
+ENV PATH $GOPATH/bin:$GOROOTgit/bin:$PATH
 
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
@@ -41,7 +41,8 @@ RUN caddyext install git
 RUN caddyext install ipfilter
 
 # Install Composer
-RUN curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+ENV COMPOSER_VERSION 1.0.0-alpha11
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=$COMPOSER_VERSION
 
 # Add cron task for automated updates
 RUN mkdir /usr/local/cron
