@@ -8,6 +8,7 @@ RUN apt-get update \
     && apt-get -y install curl php5-cli git
 
 # Install Caddy and Middleware
+RUN groupadd -r caddy && useradd -r -g caddy caddy
 USER caddy
 
 # Step 1: Get Latest Version of Go
