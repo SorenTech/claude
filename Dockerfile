@@ -33,9 +33,6 @@ ENV PATH $GOPATH/bin:$GOROOTgit/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 # Step 2: Install Caddy + git and ipfilter Extensions
-RUN groupadd -r caddy && useradd -r -g caddy caddy
-USER caddy
-
 RUN go get -u github.com/mholt/caddy
 RUN go get -u github.com/caddyserver/caddyext
 RUN caddyext install git
