@@ -5,17 +5,34 @@ CMD ["/sbin/my_init"]
 
 RUN apt-get update \
     && apt-get -y upgrade \
-    && apt-get -y install curl php5-cli git
+    && apt-get install -y --no-install-recommends \
+        curl \ 
+        php5-cli \ 
+        git \
+        g++ \
+        gcc \
+        libc6-dev \
+        make
 
 # Install Caddy and Middleware
 RUN groupadd -r caddy && useradd -r -g caddy caddy
 USER caddy
 
 # Step 1: Get Latest Version of Go
-RUN curl -sS https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz \
-    && tar -C /usr/local -xzf go1.5.3.linux-amd64.tar.gz
-RUN export GOROOT=/usr/local/go
-RUN export PATH=$PATH:/usr/local/go/bin
+ENV GOLANG_VERSION 1.5.3
+ENV GOLANG_DOWNLOAD_URL https://golang.org/dl/go$GOLANG_VERSION.linux-amd64.tar.gz
+ENV GOLANG_DOWNLOAD_SHA256 43afe0c5017e502630b1aea4d44b8a7f059bf60d7f29dfd58db454d4e4e0ae53
+
+RUN curl -fsSL "$GOLANG_DOWNLOAD_URL" -o golang.tar.gz \
+	&& echo "$GOLANG_DOWNLOAD_SHA256  golang.tar.gz" | sha256sum -c - \
+	&& tar -C /usr/local -xzf golang.tar.gz \
+	&& rm golang.tar.gz
+
+ENV GOROOT /usr/local/go
+ENV GOPATH /go
+ENV PATH $GOPATH/bin:$GOROOT/bin:$PATH
+
+RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 # Step 2: Install Caddy + git and ipfilter Extensions
 RUN go get -u github.com/mholt/caddy
