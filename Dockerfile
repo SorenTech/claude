@@ -15,8 +15,6 @@ RUN apt-get update \
         make
 
 # Install Caddy and Middleware
-RUN groupadd -r caddy && useradd -r -g caddy caddy
-USER caddy
 
 # Step 1: Get Latest Version of Go
 ENV GOLANG_VERSION 1.5.3
@@ -35,6 +33,9 @@ ENV PATH $GOPATH/bin:$GOROOTgit/bin:$PATH
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 
 # Step 2: Install Caddy + git and ipfilter Extensions
+RUN groupadd -r caddy && useradd -r -g caddy caddy
+USER caddy
+
 RUN go get -u github.com/mholt/caddy
 RUN go get -u github.com/caddyserver/caddyext
 RUN caddyext install git
